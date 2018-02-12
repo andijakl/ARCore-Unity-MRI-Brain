@@ -27,27 +27,25 @@ public class InstantiateObjectOnTouch : MonoBehaviour {
         // Now that we know that we have an active touch point, do a raycast to see if it hits
         // a plane where we can instantiate the object on.
         TrackableHit hit;
-        var raycastFilter = TrackableHitFlag.PlaneWithinBounds | TrackableHitFlag.PlaneWithinPolygon;
+        var raycastFilter = TrackableHitFlags.PlaneWithinBounds | TrackableHitFlags.PlaneWithinPolygon;
 
-        if (Session.Raycast(FirstPersonCamera.ScreenPointToRay(touch.position), raycastFilter, out hit) && PlaceGameObject != null)
+        if (Session.Raycast(touch.position.x, touch.position.y, raycastFilter, out hit) && PlaceGameObject != null)
         {
             // Create an anchor to allow ARCore to track the hitpoint as understanding of the physical
             // world evolves.
-            var anchor = Session.CreateAnchor(hit.Point, Quaternion.identity);
+            var anchor = hit.Trackable.CreateAnchor(hit.Pose);
 
             // Intanstiate a game object as a child of the anchor; its transform will now benefit
             // from the anchor's tracking.
-            var placedObject = Instantiate(PlaceGameObject, hit.Point, Quaternion.identity,
-                anchor.transform);
+            var placedObject = Instantiate(PlaceGameObject, hit.Pose.position, hit.Pose.rotation);
 
             // Game object should look at the camera but still be flush with the plane.
             placedObject.transform.LookAt(FirstPersonCamera.transform);
             placedObject.transform.rotation = Quaternion.Euler(0.0f,
                 placedObject.transform.rotation.y, placedObject.transform.rotation.z);
 
-            // Use a plane attachment component to maintain the game object's y-offset from the plane
-            // (occurs after anchor updates).
-            placedObject.GetComponent<PlaneAttachment>().Attach(hit.Plane);
+            // Make the newly placed object a child of the parent
+            placedObject.transform.parent = anchor.transform;
         }
     }
 }

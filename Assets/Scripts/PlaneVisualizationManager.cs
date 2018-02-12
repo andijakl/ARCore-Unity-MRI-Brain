@@ -14,7 +14,7 @@ public class PlaneVisualizationManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
 	{
-	    Frame.GetNewPlanes(ref _newPlanes);
+	    Frame.GetPlanes(_newPlanes, TrackableQueryFilter.New);
 
 	    // Iterate over planes found in this frame and instantiate corresponding GameObjects to visualize them.
 	    foreach (var curPlane in _newPlanes)
@@ -24,7 +24,7 @@ public class PlaneVisualizationManager : MonoBehaviour {
 	        // coordinates.
 	        var planeObject = Instantiate(TrackedPlanePrefab, Vector3.zero, Quaternion.identity,
 	            transform);
-	        planeObject.GetComponent<TrackedPlaneVisualizer>().SetTrackedPlane(curPlane);
+	        planeObject.GetComponent<TrackedPlaneVisualizer>().Initialize(curPlane);
 
 	        // Apply a random color and grid rotation.
 	        planeObject.GetComponent<Renderer>().material.SetColor("_GridColor", new Color(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f)));
