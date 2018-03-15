@@ -14,7 +14,7 @@ public class PlaneVisualizationManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
 	{
-	    Frame.GetPlanes(_newPlanes, TrackableQueryFilter.New);
+        Session.GetTrackables<TrackedPlane>(_newPlanes, TrackableQueryFilter.New);
 
 	    // Iterate over planes found in this frame and instantiate corresponding GameObjects to visualize them.
 	    foreach (var curPlane in _newPlanes)

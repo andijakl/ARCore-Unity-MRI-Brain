@@ -29,7 +29,7 @@ public class InstantiateObjectOnTouch : MonoBehaviour {
         TrackableHit hit;
         var raycastFilter = TrackableHitFlags.PlaneWithinBounds | TrackableHitFlags.PlaneWithinPolygon;
 
-        if (Session.Raycast(touch.position.x, touch.position.y, raycastFilter, out hit) && PlaceGameObject != null)
+        if (Frame.Raycast(touch.position.x, touch.position.y, raycastFilter, out hit) && PlaceGameObject != null)
         {
             // Create an anchor to allow ARCore to track the hitpoint as understanding of the physical
             // world evolves.
@@ -40,9 +40,15 @@ public class InstantiateObjectOnTouch : MonoBehaviour {
             var placedObject = Instantiate(PlaceGameObject, hit.Pose.position, hit.Pose.rotation);
 
             // Game object should look at the camera but still be flush with the plane.
-            placedObject.transform.LookAt(FirstPersonCamera.transform);
-            placedObject.transform.rotation = Quaternion.Euler(0.0f,
-                placedObject.transform.rotation.y, placedObject.transform.rotation.z);
+            if ((hit.Flags & TrackableHitFlags.PlaneWithinPolygon) != TrackableHitFlags.None)
+            {
+                // Get the camera position and match the y-component with the hit position.
+                Vector3 cameraPositionSameY = FirstPersonCamera.transform.position;
+                cameraPositionSameY.y = hit.Pose.position.y;
+
+                // Have game object look toward the camera respecting his "up" perspective, which may be from ceiling.
+                placedObject.transform.LookAt(cameraPositionSameY, placedObject.transform.up);
+            }
 
             // Make the newly placed object a child of the parent
             placedObject.transform.parent = anchor.transform;
